@@ -34,11 +34,11 @@ import java.util.List;
       o valor ideal aumentando empiricamente o coeficiente de punição.
 
 
-*/
+ */
 public class DiferencialEvolution {
 
     static final int N = 2;
-    static final int AMOUNT_INDIVIDUALS = 20;
+    static final int AMOUNT_INDIVIDUALS = 10;
     static final double F = 0.5;
 
     static Individual population[];
@@ -49,18 +49,21 @@ public class DiferencialEvolution {
         generate_population();
         calculate_fitness_population();
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 1000; i++) {
             generate_new_population(population);
             Individual betterIndividual = get_better_individual(population);
             double media = get_avg_fitness_population(population);
-            
-            System.out.println("F(x)=" + betterIndividual.getFitness()+ " img Média individuos (com punição): " + media);
+
+            System.out.println("F(x)=" + betterIndividual.getFitness()
+                    + " SUM(Gx) = " + betterIndividual.getGx()
+                    + " SUM(HX) = " + betterIndividual.getHx()
+                    + " img Média individuos (com punição): " + media);
             System.out.println("Vetor X: ");
             for (int j = 0; j < N; j++) {
-                System.out.print(betterIndividual.getX()[j]+"; ");
+                System.out.print(betterIndividual.getX()[j] + "; ");
             }
             System.out.println("");
-            
+
 //            melhorFitness.add(i, betterIndividual.getFitness());
 //            mediaFitness.add(i, media);
         }
@@ -99,38 +102,42 @@ public class DiferencialEvolution {
         //           H(x) = cos(2𝜋𝑥j) + 0,5 = 0    j = 1,2, . . , n
         double fx = 10 * N, gx;
 
-        double somafx = 0, somap_gx = 0, somap_hx = 0, hx;
+        double somafx = 0, somap_gx = 0, somap_hx = 0, hx, somagx = 0, somahx = 0;
         for (int j = 0; j < N; j++) {
             double x = individual.getX()[j];
             somafx = somafx + x * x - 10 * Math.cos(2 * Math.PI * x);
 
             gx = Math.sin(2 * Math.PI * x) + 0.5;
+            somagx += gx;
             if (gx > 0) {
                 somap_gx += gx;
             }
 
             hx = Math.cos(2 * Math.PI * x) + 0.5;
-            
+            somahx += hx;
+
             somap_hx += Math.abs(hx);
         }
 
         fx = fx + somafx;
 
-        fitness = fx + 30*somap_hx + 90*somap_gx;//fx + somap_gx + somap_hx;
+        fitness = fx + 30 * somap_hx + 90 * somap_gx;//fx + somap_gx + somap_hx;
         //r = 30 e s = 90
-        individual.setPunicaoG(90*somap_gx);
-        individual.setPunicaoH(30*somap_hx);
-        
+        individual.setPunicaoG(90 * somap_gx);
+        individual.setPunicaoH(30 * somap_hx);
+
+        individual.setGx(somagx);
+        individual.setHx(somahx);
+
         individual.setFuncaoObj(fx);
         individual.setFitness(fitness);
 
     }
-    
+
     /*
        Resolver domínio: se sair do domínio, arredondar para o extremo ou 
        sortear um valor aleatório na faixa do domínio.
-    */
-
+     */
     public static void generate_new_population(Individual population[]) {
         Individual vector_noise, ind_experiment;
         for (int i = 0; i < population.length; i++) {
@@ -158,11 +165,11 @@ public class DiferencialEvolution {
 
         for (int j = 0; j < N; j++) {
             ind_diference.getX()[j] = F * (ind1.getX()[j] - ind2.getX()[j]);
-            
+
             double x = ind_diference.getX()[j] + ind3.getX()[j];
-            if (x > 5.12){
+            if (x > 5.12) {
                 x = 5.12;
-            }else if (x < -5.12){
+            } else if (x < -5.12) {
                 x = -5.12;
             }
             ind_noise.getX()[j] = x;
@@ -193,26 +200,26 @@ public class DiferencialEvolution {
     public static Individual cross_breeding(Individual ind_i, Individual ind_noise) {
         Individual ind_experiment = new Individual(N);
         int cont_noise = 0;
-        
+
         for (int i = 0; i < N; i++) {
 
             double number = Math.random();
 
             if (number <= 0.8) {
-                
+
                 ind_experiment.getX()[i] = ind_i.getX()[i];
             } else {
-                
+
                 ind_experiment.getX()[i] = ind_noise.getX()[i];
                 cont_noise++;
             }
         }
-        if (cont_noise == 0){
-            int number[] = random_numbers_not_repeat(0, N-1, 1);
-            
+        if (cont_noise == 0) {
+            int number[] = random_numbers_not_repeat(0, N - 1, 1);
+
             ind_experiment.getX()[number[0]] = ind_noise.getX()[number[0]];
         }
-        
+
         return ind_experiment;
     }
 
@@ -222,7 +229,7 @@ public class DiferencialEvolution {
             population[i] = ind_experiment;
         }
     }
-    
+
     public static Individual get_better_individual(Individual population[]) {
         double menorFitness = population[0].getFitness();
         Individual betterIndividual = population[0];
@@ -238,7 +245,7 @@ public class DiferencialEvolution {
 
         return betterIndividual;
     }
-    
+
     public static double get_avg_fitness_population(Individual[] population) {
         double soma = 0;
         for (int i = 0; i < population.length; i++) {
