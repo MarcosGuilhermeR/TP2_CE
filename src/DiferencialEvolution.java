@@ -37,8 +37,8 @@ import java.util.List;
 */
 public class DiferencialEvolution {
 
-    static final int N = 1;
-    static final int AMOUNT_INDIVIDUALS = 10;
+    static final int N = 2;
+    static final int AMOUNT_INDIVIDUALS = 20;
     static final double F = 0.5;
 
     static Individual population[];
@@ -54,7 +54,7 @@ public class DiferencialEvolution {
             Individual betterIndividual = get_better_individual(population);
             double media = get_avg_fitness_population(population);
             
-            System.out.println("Fitness=" + betterIndividual.getFitness()+ " img Média individuos: " + media);
+            System.out.println("F(x)=" + betterIndividual.getFitness()+ " img Média individuos (com punição): " + media);
             System.out.println("Vetor X: ");
             for (int j = 0; j < N; j++) {
                 System.out.print(betterIndividual.getX()[j]+"; ");
@@ -110,16 +110,26 @@ public class DiferencialEvolution {
             }
 
             hx = Math.cos(2 * Math.PI * x) + 0.5;
+            
             somap_hx += Math.abs(hx);
         }
 
         fx = fx + somafx;
 
-        fitness = fx + 1000*somap_hx + 100*somap_gx;//fx + somap_gx + somap_hx;
-
+        fitness = fx + 30*somap_hx + 90*somap_gx;//fx + somap_gx + somap_hx;
+        //r = 30 e s = 90
+        individual.setPunicaoG(90*somap_gx);
+        individual.setPunicaoH(30*somap_hx);
+        
+        individual.setFuncaoObj(fx);
         individual.setFitness(fitness);
 
     }
+    
+    /*
+       Resolver domínio: se sair do domínio, arredondar para o extremo ou 
+       sortear um valor aleatório na faixa do domínio.
+    */
 
     public static void generate_new_population(Individual population[]) {
         Individual vector_noise, ind_experiment;
@@ -148,7 +158,14 @@ public class DiferencialEvolution {
 
         for (int j = 0; j < N; j++) {
             ind_diference.getX()[j] = F * (ind1.getX()[j] - ind2.getX()[j]);
-            ind_noise.getX()[j] = ind_diference.getX()[j] + ind3.getX()[j];
+            
+            double x = ind_diference.getX()[j] + ind3.getX()[j];
+            if (x > 5.12){
+                x = 5.12;
+            }else if (x < -5.12){
+                x = -5.12;
+            }
+            ind_noise.getX()[j] = x;
         }
 
         return ind_noise;
