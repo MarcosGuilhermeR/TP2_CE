@@ -38,13 +38,14 @@ import java.util.List;
 public class DiferencialEvolution {
 
     static final int N = 2;
-    static final int AMOUNT_INDIVIDUALS = 10;
+    static final int AMOUNT_INDIVIDUALS = 20;
     static final double F = 0.5;
 
-    static Individual population[];
+    static Individual population[], newpopulation[];
 
     public static void main(String[] args) {
         population = new Individual[AMOUNT_INDIVIDUALS];
+        newpopulation = new Individual[AMOUNT_INDIVIDUALS];
 
         generate_population();
         calculate_fitness_population();
@@ -66,6 +67,8 @@ public class DiferencialEvolution {
 
 //            melhorFitness.add(i, betterIndividual.getFitness());
 //            mediaFitness.add(i, media);
+
+            population = newpopulation;
         }
 
     }
@@ -146,22 +149,33 @@ public class DiferencialEvolution {
 
             calculate_fitness_individual(ind_experiment);
 
-            select_better_individual(population, i, ind_experiment);
+            newpopulation[i] = select_better_individual(population[i], ind_experiment);
         }
     }
 
     public static Individual diference_and_mutation(Individual population[], int i) {
-        Individual ind1, ind2, ind3, ind_diference = new Individual(N), ind_noise = new Individual(N);
+        Individual ind1, ind2, ind3, ind4, ind5, ind6;
+        Individual ind_diference = new Individual(N), ind_noise = new Individual(N);
 
-        int numbers[] = random_numbers_not_repeat(0, AMOUNT_INDIVIDUALS - 1, 3);
+        int numbers[] = random_numbers_not_repeat(0, AMOUNT_INDIVIDUALS - 1, 6);
 
-        while (numbers[0] == i || numbers[1] == i || numbers[2] == i) {
-            numbers = random_numbers_not_repeat(0, AMOUNT_INDIVIDUALS - 1, 3);
+        while (numbers[0] == i || numbers[1] == i || numbers[2] == i
+                || numbers[3] == i || numbers[4] == i || numbers[5] == i) {
+            numbers = random_numbers_not_repeat(0, AMOUNT_INDIVIDUALS - 1, 6);
         }
 
+        //Torneio - Início
         ind1 = population[numbers[0]];
         ind2 = population[numbers[1]];
         ind3 = population[numbers[2]];
+        ind4 = population[numbers[3]];
+        ind5 = population[numbers[4]];
+        ind6 = population[numbers[5]];
+
+        ind1 = select_better_individual(ind1, ind2);
+        ind2 = select_better_individual(ind3, ind4);
+        ind3 = select_better_individual(ind5, ind6);
+//Torneio - Fim
 
         for (int j = 0; j < N; j++) {
             ind_diference.getX()[j] = F * (ind1.getX()[j] - ind2.getX()[j]);
@@ -223,10 +237,12 @@ public class DiferencialEvolution {
         return ind_experiment;
     }
 
-    private static void select_better_individual(Individual[] population, int i, Individual ind_experiment) {
+    private static Individual select_better_individual(Individual indPopulation, Individual ind_experiment) {
 
-        if (ind_experiment.getFitness() < population[i].getFitness()) {
-            population[i] = ind_experiment;
+        if (ind_experiment.getFitness() < indPopulation.getFitness()) {
+            return ind_experiment;
+        } else {
+            return indPopulation;
         }
     }
 
