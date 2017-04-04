@@ -13,28 +13,6 @@ import java.util.List;
  * @author marcos
  */
 
-/*
-    Dúvidas:
-    * Qual a aplicação do F
-    * E se tiver X fora do domínio?
-        Exemplo ind1 = 10, ind2 = 0, ind3 = 10.    Domínio:[0, 10]
-        
-        F*(ind1 - ind2) + ind3
-        0.5*(10 - 0) + 10
-            5 + 10 = 15
-
-    
-    * Como existe apenas um X que satisfaz as duas condições, otimizar
-      significa encontrar esse X?
-    * Como faz a punição no indivíduo?
-    * Os x's que satisfazem as restrições G(x) e H(x) são na verdade:
-      (-1/3) + N onde N é um numero inteiro, positivou ou negatico,
-        o que equivale a uma volta positiva ou negativa no circulo trigonométrico.
-    * OBS: como definir o coeficiente de punição? pois só consegui encontrar
-      o valor ideal aumentando empiricamente o coeficiente de punição.
-
-
- */
 public class DiferencialEvolution {
 
     static final int N = 2;
@@ -137,10 +115,7 @@ public class DiferencialEvolution {
 
     }
 
-    /*
-       Resolver domínio: se sair do domínio, arredondar para o extremo ou 
-       sortear um valor aleatório na faixa do domínio.
-     */
+
     public static void generate_new_population(Individual population[]) {
         Individual vector_noise, ind_experiment;
         for (int i = 0; i < population.length; i++) {
